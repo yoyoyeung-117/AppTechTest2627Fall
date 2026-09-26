@@ -19,7 +19,9 @@ The first Android build requires a configured JDK, Android SDK, and an emulator 
 connected device. For subsequent JavaScript-only changes, run
 `npx expo start --dev-client`. The starter's native dependencies require a development
 build. The original starter was launched successfully on an Android emulator; the
-new prerequisite interactions still need manual device review. iOS has not been tested.
+catalogue, semester/department filters, empty/reset states, details, prerequisite
+expansion, and Back navigation were also checked on that Android development build.
+iOS has not been tested; see docs/QA.md for remaining coverage.
 
 ## Local course data
 
@@ -145,85 +147,20 @@ Detail checks cover semester isolation, raw prerequisite wording, empty text,
 malformed data, invalid course keys, and equality of all generated detail records
 with their original source fields.
 An offline Expo Android bundle export passed after adding detail navigation and
-the generated loaders. Device navigation and visual checks remain pending.
+the generated loaders. The device scenarios observed in the subsequent QA session
+and remaining visual/performance coverage are listed in docs/QA.md.
 Prerequisite checks cover extraction, historical codes, shorthand, duplicate references,
 free-form conditions, missing nodes, self/indirect cycles, shared descendants, depth
 limits, and real semester-specific resolution.
 
-## Original Ignite starter documentation
+## Quality assurance
 
-> The latest and greatest boilerplate for Infinite Red opinions
+Run `npm run check` for type checking, linting, all 16 course logic tests, and the
+20 existing Jest tests. See [QA record](docs/QA.md) for device observations, repeatable
+scenarios, and pending platform/performance coverage.
 
-This is the boilerplate that [Infinite Red](https://infinite.red) uses as a way to test bleeding-edge changes to our React Native stack.
+## Credits
 
-- [Quick start documentation](https://github.com/infinitered/ignite/blob/master/docs/boilerplate/Boilerplate.md)
-- [Full documentation](https://github.com/infinitered/ignite/blob/master/docs/README.md)
-
-## Getting Started
-
-```bash
-yarn install
-yarn start
-```
-
-To make things work on your local simulator, or on your phone, you need first to [run `eas build`](https://github.com/infinitered/ignite/blob/master/docs/expo/EAS.md). We have many shortcuts on `package.json` to make it easier:
-
-```bash
-yarn build:ios:sim # build for ios simulator
-yarn build:ios:device # build for ios device
-yarn build:ios:prod # build for ios device
-```
-
-### `./assets`
-
-This directory is designed to organize and store various assets, making it easy for you to manage and use them in your application. The assets are further categorized into subdirectories, including `icons` and `images`:
-
-```tree
-assets
-├── icons
-└── images
-```
-
-**icons**
-This is where your icon assets will live. These icons can be used for buttons, navigation elements, or any other UI components. The recommended format for icons is PNG, but other formats can be used as well.
-
-Ignite comes with a built-in `Icon` component. You can find detailed usage instructions in the [docs](https://github.com/infinitered/ignite/blob/master/docs/boilerplate/app/components/Icon.md).
-
-**images**
-This is where your images will live, such as background images, logos, or any other graphics. You can use various formats such as PNG, JPEG, or GIF for your images.
-
-Another valuable built-in component within Ignite is the `AutoImage` component. You can find detailed usage instructions in the [docs](https://github.com/infinitered/ignite/blob/master/docs/Components-AutoImage.md).
-
-How to use your `icon` or `image` assets:
-
-```typescript
-import { Image } from 'react-native';
-
-const MyComponent = () => {
-  return (
-    <Image source={require('assets/images/my_image.png')} />
-  );
-};
-```
-
-## Running Maestro end-to-end tests
-
-Follow our [Maestro Setup](https://ignitecookbook.com/docs/recipes/MaestroSetup) recipe.
-
-## Next Steps
-
-### Ignite Cookbook
-
-[Ignite Cookbook](https://ignitecookbook.com/) is an easy way for developers to browse and share code snippets (or “recipes”) that actually work.
-
-### Upgrade Ignite boilerplate
-
-Read our [Upgrade Guide](https://ignitecookbook.com/docs/recipes/UpdatingIgnite) to learn how to upgrade your Ignite project.
-
-## Community
-
-⭐️ Help us out by [starring on GitHub](https://github.com/infinitered/ignite), filing bug reports in [issues](https://github.com/infinitered/ignite/issues) or [ask questions](https://github.com/infinitered/ignite/discussions).
-
-💬 Join us on [Slack](https://join.slack.com/t/infiniteredcommunity/shared_invite/zt-1f137np4h-zPTq_CbaRFUOR_glUFs2UA) to discuss.
-
-📰 Make our Editor-in-chief happy by [reading the React Native Newsletter](https://reactnativenewsletter.com/).
+Built from the USThing technical-test template using the
+[Infinite Red Ignite starter](https://github.com/infinitered/ignite).
+The supplied course dataset is based on the public UST Archive catalogue.

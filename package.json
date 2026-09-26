@@ -4,6 +4,8 @@
   "private": true,
   "main": "index.tsx",
   "scripts": {
+    "test:core": "node --import tsx --test scripts/course-data.checks.ts scripts/course-search.checks.ts scripts/course-details.checks.ts scripts/prerequisites.checks.ts",
+    "check": "npm run compile && npm run lint:check && npm run test:core && jest --runInBand --watchman=false",
     "data:prepare": "node --import tsx scripts/prepare-courses.ts",
     "test:data": "node --import tsx --test scripts/course-data.checks.ts",
     "test:search": "node --import tsx --test scripts/course-search.checks.ts",

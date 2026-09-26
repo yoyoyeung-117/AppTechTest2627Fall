@@ -1,4 +1,67 @@
-# Welcome to your new ignited app!
+# HKUST Course Explorer
+
+An Expo and React Native course explorer built incrementally from the Ignite starter.
+The current app displays local course records across all supplied semesters. Search,
+filters, detail navigation, and prerequisite traversal are not implemented yet.
+
+## Run the current app
+
+Use Node.js and the existing Yarn Classic lockfile:
+
+```bash
+npx --yes yarn@1.22.22 install --frozen-lockfile
+npm run data:prepare
+npx expo run:android --device
+```
+
+The first Android build requires a configured JDK, Android SDK, and an emulator or
+connected device. For subsequent JavaScript-only changes, run
+`npx expo start --dev-client`. The starter's native dependencies require a development
+build. The original starter was launched successfully on an Android emulator; the
+new dataset-backed list still needs manual device review. iOS has not been tested.
+
+## Local course data
+
+Keep the supplied `courses.json` in the repository root. Run `npm run data:prepare`
+after replacing it. The generated `app/data/generated/course-summaries.json` should
+be committed alongside source changes; do not edit it manually.
+
+The supplied file contains 15,178 semester-specific records across four terms.
+The preparation script validates required fields and credit ranges, rejects duplicate
+semester/course keys, and produces a compact list model. All records are retained.
+The original file is 28,878,583 bytes; the generated list file is 2,752,545 bytes.
+These are file sizes, not measurements of application memory or launch performance.
+
+Only the generated summaries are imported into the app. They include course code,
+title, department, semester, and minimum/maximum credits. Descriptions and raw
+prerequisite text remain in the original dataset for future detail/explorer work.
+Data preparation runs in Node.js on the development machine, not on the phone.
+
+`CourseListScreen` uses a `FlatList` inside a non-scrolling `Screen`. The list
+virtualizes its rows; the summary array itself is still loaded in full. A row's
+identity combines `term_code` and `id` because course IDs repeat across semesters.
+Sorting uses descending term codes, then course codes, then keys. This chronological
+term ordering is based on the supplied dataset's term-code format. A semester record
+is not proof that a class section is scheduled or has seats available.
+
+No mutable list state is needed yet. Navigation uses React Navigation; appearance
+uses the starter's theme context. Dataset summary types are in
+`app/data/courseTypes.ts`, transformation logic is in `scripts/course-data.ts`, and
+the app-facing data export is in `app/data/courses.ts`.
+
+## Checks
+
+```bash
+npm run compile
+npm run lint:check
+npm run test:data
+```
+
+The data checks use Node's test runner separately from the starter's Jest tests.
+They cover repeated courses across semesters, credit ranges, duplicate identities,
+malformed records, and an empty dataset.
+
+## Original Ignite starter documentation
 
 > The latest and greatest boilerplate for Infinite Red opinions
 

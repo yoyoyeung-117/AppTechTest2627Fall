@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { View, type ViewStyle } from "react-native"
 
 import { Button } from "@/components/Button"
+import { PrerequisiteExplorer } from "@/components/PrerequisiteExplorer"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { getCourseDetails } from "@/data/courseDetails"
@@ -25,7 +26,7 @@ export function CourseDetailsScreen({ navigation, route }: AppStackScreenProps<"
       safeAreaEdges={["top", "bottom"]}
       contentContainerStyle={themed($container)}
     >
-      <Button text="Back to courses" onPress={goBack} />
+      <Button text={navigation.canGoBack() ? "Back" : "Back to courses"} onPress={goBack} />
       {!course ? (
         <>
           <Text text="Course not found" preset="heading" accessibilityRole="header" />
@@ -47,9 +48,10 @@ export function CourseDetailsScreen({ navigation, route }: AppStackScreenProps<"
             title="Description"
             content={course.description || "No description listed."}
           />
-          <DetailSection
-            title="Prerequisites"
-            content={course.prerequisite || "No prerequisites listed."}
+          <PrerequisiteExplorer
+            key={course.key}
+            course={course}
+            onOpen={(key) => navigation.push("CourseDetails", { courseKey: key })}
           />
           {!!course.corequisite && (
             <DetailSection title="Corequisites" content={course.corequisite} />

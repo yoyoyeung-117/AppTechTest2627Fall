@@ -2,8 +2,8 @@
 
 An Expo and React Native course explorer built incrementally from the Ignite starter.
 The current app displays local course records with code/title search and combined
-semester/department filters and semester-specific course details. Prerequisite
-traversal is not implemented yet; details currently display the source text.
+semester/department filters, semester-specific details, and an expandable prerequisite
+explorer with links to referenced courses.
 
 ## Run the current app
 
@@ -19,7 +19,7 @@ The first Android build requires a configured JDK, Android SDK, and an emulator 
 connected device. For subsequent JavaScript-only changes, run
 `npx expo start --dev-client`. The starter's native dependencies require a development
 build. The original starter was launched successfully on an Android emulator; the
-new course-detail interactions still need manual device review. iOS has not been tested.
+new prerequisite interactions still need manual device review. iOS has not been tested.
 
 ## Local course data
 
@@ -99,6 +99,31 @@ synchronous and first-visit latency still needs device measurement. The four det
 files contain 2,139,393; 2,271,026; 2,290,874; and 2,381,181 bytes respectively for
 terms 2520, 2530, 2540, and 2610.
 
+## Prerequisite explorer
+
+The detail screen lists direct references and lets users expand their prerequisites
+or open their details. Navigation uses `push` so Back returns to the previous course.
+Empty text is labelled "No prerequisites listed"; nonempty conditions without course
+codes remain visible with a separate no-references message.
+
+`app/data/prerequisites.ts` extracts four-letter prefixes and three/four-digit numbers
+with optional letter suffixes, numeric ranges, and slash shorthand such as
+`LIFS 2040/2210`. It normalizes case and deduplicates references per parent. A regression
+check excludes academic-year wording such as `from 2011-12`. This heuristic is not
+an eligibility parser; unusual shorthand may be missed. Original AND/OR conditions,
+grades, and permission text remain visible at every level.
+
+References resolve only within the current semester through a term/code map. The
+supplied dataset has unique term/code pairs. Missing historical codes are labelled
+unavailable rather than silently replaced with another semester's data.
+
+Children are resolved and mounted only when expanded. Each branch carries its own
+ancestor keys: a repeated key on that path stops expansion as a cycle. Shared courses
+on different paths remain independently explorable. Eight levels may be expanded;
+the next level shows a limit message and a detail link to continue from a new root.
+No entire graph is recursively constructed at startup. Explicit level labels avoid
+deep indentation squeezing text on a narrow display.
+
 ## Checks
 
 ```bash
@@ -107,6 +132,7 @@ npm run lint:check
 npm run test:data
 npm run test:search
 npm run test:details
+npm run test:prerequisites
 ```
 
 The data checks use Node's test runner separately from the starter's Jest tests.
@@ -120,6 +146,9 @@ malformed data, invalid course keys, and equality of all generated detail record
 with their original source fields.
 An offline Expo Android bundle export passed after adding detail navigation and
 the generated loaders. Device navigation and visual checks remain pending.
+Prerequisite checks cover extraction, historical codes, shorthand, duplicate references,
+free-form conditions, missing nodes, self/indirect cycles, shared descendants, depth
+limits, and real semester-specific resolution.
 
 ## Original Ignite starter documentation
 

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { View, type ViewStyle } from "react-native"
+import { View, type TextStyle, type ViewStyle } from "react-native"
 
 import { findCourseInTerm } from "@/data/courseDetails"
 import type { CourseDetails } from "@/data/courseTypes"
@@ -21,7 +21,7 @@ export function PrerequisiteExplorer({ course, onOpen }: ExplorerProps) {
     <View style={themed($group)}>
       <Text text="Prerequisites" preset="subheading" accessibilityRole="header" />
       <Text
-        text="Explore referenced courses in this semester. Read the original wording for AND/OR choices and other conditions; these links are not an eligibility check."
+        text="Explore the courses below. The original wording defines AND/OR choices and other conditions; links do not confirm eligibility."
         size="sm"
       />
       <PrerequisiteLevel course={course} ancestors={[course.key]} onOpen={onOpen} />
@@ -63,9 +63,17 @@ function PrerequisiteItem({
   const target = branch.course
   return (
     <View style={themed($branch)}>
-      <Text text={`Level ${ancestors.length} · ${branch.code}`} preset="bold" />
+      <Text
+        text={`Level ${ancestors.length} · ${branch.code}`}
+        preset="bold"
+        style={themed($accent)}
+      />
       {target && (
-        <Button text={`Open ${branch.code}: ${target.title}`} onPress={() => onOpen(target.key)} />
+        <Button
+          text={`Open ${branch.code}: ${target.title}`}
+          preset="filled"
+          onPress={() => onOpen(target.key)}
+        />
       )}
       {branch.status === "missing" && (
         <Text text="Not found in this semester's local catalogue." size="sm" />
@@ -109,3 +117,5 @@ const $branch: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   paddingBottom: spacing.sm,
   gap: spacing.xs,
 })
+
+const $accent: ThemedStyle<TextStyle> = ({ colors }) => ({ color: colors.tint })

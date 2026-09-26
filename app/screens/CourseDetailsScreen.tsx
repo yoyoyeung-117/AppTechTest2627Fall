@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { View, type ViewStyle } from "react-native"
+import { View, type TextStyle, type ViewStyle } from "react-native"
 
 import { Button } from "@/components/Button"
 import { PrerequisiteExplorer } from "@/components/PrerequisiteExplorer"
@@ -26,7 +26,12 @@ export function CourseDetailsScreen({ navigation, route }: AppStackScreenProps<"
       safeAreaEdges={["top", "bottom"]}
       contentContainerStyle={themed($container)}
     >
-      <Button text={navigation.canGoBack() ? "Back" : "Back to courses"} onPress={goBack} />
+      <Button
+        text={navigation.canGoBack() ? "‹ Back" : "Back to courses"}
+        style={$back}
+        preset="filled"
+        onPress={goBack}
+      />
       {!course ? (
         <>
           <Text text="Course not found" preset="heading" accessibilityRole="header" />
@@ -34,25 +39,35 @@ export function CourseDetailsScreen({ navigation, route }: AppStackScreenProps<"
         </>
       ) : (
         <>
-          <Text text={course.code} preset="heading" accessibilityRole="header" />
-          <Text text={course.title} preset="subheading" />
-          <Text text={`${course.termName} · ${course.department} · ${course.campus}`} />
-          <Text
-            text={
-              course.minCredits === course.maxCredits
-                ? `${course.minCredits} credits`
-                : `${course.minCredits}–${course.maxCredits} credits`
-            }
-          />
+          <View style={themed($hero)}>
+            <Text text="COURSE DETAILS" size="xxs" weight="bold" style={themed($accent)} />
+            <Text
+              text={course.code}
+              preset="heading"
+              style={themed($accent)}
+              accessibilityRole="header"
+            />
+            <Text text={course.title} preset="subheading" />
+            <Text text={`${course.termName} · ${course.department} · ${course.campus}`} />
+            <Text
+              text={
+                course.minCredits === course.maxCredits
+                  ? `${course.minCredits} credits`
+                  : `${course.minCredits}–${course.maxCredits} credits`
+              }
+            />
+          </View>
           <DetailSection
             title="Description"
             content={course.description || "No description listed."}
           />
-          <PrerequisiteExplorer
-            key={course.key}
-            course={course}
-            onOpen={(key) => navigation.push("CourseDetails", { courseKey: key })}
-          />
+          <View style={themed($section)}>
+            <PrerequisiteExplorer
+              key={course.key}
+              course={course}
+              onOpen={(key) => navigation.push("CourseDetails", { courseKey: key })}
+            />
+          </View>
           {!!course.corequisite && (
             <DetailSection title="Corequisites" content={course.corequisite} />
           )}
@@ -77,8 +92,24 @@ function DetailSection({ title, content }: { title: string; content: string }) {
 }
 
 const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.lg,
+  width: "100%",
+  maxWidth: 760,
+  alignSelf: "center",
+  padding: spacing.md,
   gap: spacing.md,
 })
 
-const $section: ThemedStyle<ViewStyle> = ({ spacing }) => ({ gap: spacing.xs })
+const $section: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.surface,
+  borderRadius: 16,
+  padding: spacing.md,
+  gap: spacing.sm,
+})
+const $hero: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  backgroundColor: colors.accentSurface,
+  borderRadius: 20,
+  padding: spacing.lg,
+  gap: spacing.sm,
+})
+const $accent: ThemedStyle<TextStyle> = ({ colors }) => ({ color: colors.tint })
+const $back: ViewStyle = { alignSelf: "flex-start", minWidth: 88 }

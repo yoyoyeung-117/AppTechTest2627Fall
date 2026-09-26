@@ -159,6 +159,16 @@ Run `npm run check` for type checking, linting, all 16 course logic tests, and t
 20 existing Jest tests. See [QA record](docs/QA.md) for device observations, repeatable
 scenarios, and pending platform/performance coverage.
 
+## Appearance and responsive layout
+
+The app uses semantic blue theme colors with separate light and dark palettes.
+Course cards, detail panels, inputs, and buttons share rounded surfaces and spacing.
+Catalogue, picker, and detail content use a centered column capped at 760dp.
+Search and filters scroll with the catalogue. Filter buttons stack below 360dp or
+when the system font scale reaches 1.3; text wraps without fixed card heights.
+See [Design](DESIGN.md) for the design rules and [QA record](docs/QA.md) for observed
+Android behavior and remaining device coverage.
+
 ## Credits
 
 Built from the USThing technical-test template using the

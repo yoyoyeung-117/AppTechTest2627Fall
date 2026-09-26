@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { FlatList, Keyboard, Pressable, View, type ViewStyle } from "react-native"
+import { FlatList, Keyboard, Pressable, View, type TextStyle, type ViewStyle } from "react-native"
 
 import { Button } from "@/components/Button"
 import { CourseFilterPicker } from "@/components/CourseFilterPicker"
@@ -38,40 +38,61 @@ export function CourseListScreen({ navigation }: AppStackScreenProps<"CourseList
 
   return (
     <Screen preset="fixed" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$screen}>
-      <View style={themed($header)}>
-        <Text text="Course Explorer" preset="heading" accessibilityRole="header" />
-        <TextField
-          label="Search courses"
-          accessibilityLabel="Search by course code or title"
-          placeholder="Course code or title"
-          value={query}
-          onChangeText={setQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
-          returnKeyType="search"
-        />
-        <View style={themed($filters)}>
-          <CourseFilterPicker
-            label="Semester"
-            options={semesterOptions}
-            value={termCode}
-            onChange={setTermCode}
-          />
-          <CourseFilterPicker
-            label="Department"
-            options={departmentOptions}
-            value={department}
-            onChange={setDepartment}
-          />
-        </View>
-        <Text
-          text={`${filteredCourses.length.toLocaleString()} of ${courses.length.toLocaleString()} course records`}
-          size="sm"
-          accessibilityLiveRegion="polite"
-        />
-        {hasFilters && <Button text="Reset search and filters" onPress={resetFilters} />}
-      </View>
       <FlatList<CourseSummary>
+        ListHeaderComponent={
+          <View style={themed($header)}>
+            <Text
+              text="HKUST / COURSE CATALOGUE"
+              size="xxs"
+              weight="bold"
+              style={themed($accent)}
+            />
+            <Text
+              text="Find your next course."
+              preset="heading"
+              style={$heading}
+              accessibilityRole="header"
+            />
+            <Text
+              text="Explore subjects. Understand what comes next."
+              size="sm"
+              style={themed($muted)}
+            />
+            <TextField
+              label="Search courses"
+              accessibilityLabel="Search by course code or title"
+              placeholder="Course code or title"
+              value={query}
+              onChangeText={setQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+              onSubmitEditing={Keyboard.dismiss}
+            />
+            <View style={themed($filters)}>
+              <CourseFilterPicker
+                label="Semester"
+                options={semesterOptions}
+                value={termCode}
+                onChange={setTermCode}
+              />
+              <CourseFilterPicker
+                label="Department"
+                options={departmentOptions}
+                value={department}
+                onChange={setDepartment}
+              />
+            </View>
+            <Text
+              text={`${filteredCourses.length.toLocaleString()} of ${courses.length.toLocaleString()} course records`}
+              size="sm"
+              accessibilityLiveRegion="polite"
+            />
+            {hasFilters && (
+              <Button text="Reset search and filters" preset="filled" onPress={resetFilters} />
+            )}
+          </View>
+        }
         style={$list}
         ref={listRef}
         data={filteredCourses}
@@ -90,20 +111,33 @@ export function CourseListScreen({ navigation }: AppStackScreenProps<"CourseList
               navigation.navigate("CourseDetails", { courseKey: item.key })
             }}
           >
-            <Text text={item.code} preset="subheading" />
-            <Text text={item.title} />
-            <Text
-              text={
-                item.minCredits === item.maxCredits
-                  ? `${item.minCredits} credits`
-                  : `${item.minCredits}–${item.maxCredits} credits`
-              }
-            />
-            <Text text={`${item.department} · ${item.termName}`} size="sm" />
+            <View style={$cardTop}>
+              <Text text={item.code} preset="subheading" style={themed($code)} />
+              <View style={themed($badge)}>
+                <Text
+                  text={
+                    item.minCredits === item.maxCredits
+                      ? `${item.minCredits} credits`
+                      : `${item.minCredits}–${item.maxCredits} credits`
+                  }
+                  size="xxs"
+                  weight="medium"
+                  style={themed($accent)}
+                />
+              </View>
+            </View>
+            <Text text={item.title} weight="medium" />
+            <Text text={`${item.department} · ${item.termName}`} size="xs" style={themed($muted)} />
           </Pressable>
         )}
         ListEmptyComponent={
-          <Text text="No courses match. Try another search or reset your filters." />
+          <View style={themed($courseCard)}>
+            <Text text="No matches yet" preset="subheading" />
+            <Text
+              text="Try a different course code or reset your filters."
+              style={themed($muted)}
+            />
+          </View>
         }
       />
     </Screen>
@@ -121,20 +155,47 @@ const $filters: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 
 const $header: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.lg,
-  gap: spacing.xs,
+  paddingTop: spacing.lg,
+  paddingBottom: spacing.lg,
+  gap: spacing.sm,
 })
 
 const $listContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.lg,
-  paddingBottom: spacing.lg,
+  width: "100%",
+  maxWidth: 760,
+  alignSelf: "center",
+  paddingHorizontal: spacing.md,
+  paddingBottom: spacing.xl,
 })
 
 const $courseCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  borderColor: colors.border,
+  backgroundColor: colors.surface,
+  borderColor: colors.separator,
   borderWidth: 1,
-  borderRadius: 12,
+  borderRadius: 16,
   padding: spacing.md,
   gap: spacing.xs,
   marginBottom: spacing.md,
+})
+
+const $heading: TextStyle = { fontSize: 32, lineHeight: 40 }
+const $cardTop: ViewStyle = {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 8,
+}
+const $code: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.tint,
+  fontSize: 20,
+  lineHeight: 28,
+})
+const $accent: ThemedStyle<TextStyle> = ({ colors }) => ({ color: colors.tint })
+const $muted: ThemedStyle<TextStyle> = ({ colors }) => ({ color: colors.textDim })
+const $badge: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.accentSurface,
+  paddingHorizontal: 10,
+  paddingVertical: 4,
+  borderRadius: 8,
 })

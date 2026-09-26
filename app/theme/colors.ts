@@ -1,20 +1,20 @@
 const palette = {
   neutral100: "#FFFFFF",
-  neutral200: "#F4F2F1",
-  neutral300: "#D7CEC9",
-  neutral400: "#B6ACA6",
-  neutral500: "#978F8A",
-  neutral600: "#564E4A",
-  neutral700: "#3C3836",
-  neutral800: "#191015",
-  neutral900: "#000000",
+  neutral200: "#F3F6FC",
+  neutral300: "#DCE5F2",
+  neutral400: "#94A3B8",
+  neutral500: "#64748B",
+  neutral600: "#475569",
+  neutral700: "#334155",
+  neutral800: "#152238",
+  neutral900: "#0B1220",
 
-  primary100: "#F4E0D9",
-  primary200: "#E8C1B4",
-  primary300: "#DDA28E",
-  primary400: "#D28468",
-  primary500: "#C76542",
-  primary600: "#A54F31",
+  primary100: "#EAF1FF",
+  primary200: "#BCD1FF",
+  primary300: "#93B4FF",
+  primary400: "#608EF2",
+  primary500: "#1D4ED8",
+  primary600: "#163DAD",
 
   secondary100: "#DCDDE9",
   secondary200: "#BCC0D6",
@@ -45,6 +45,10 @@ export const colors = {
   /**
    * A helper for making something see-thru.
    */
+  surface: "#FFFFFF",
+  accentSurface: "#EAF1FF",
+  primaryAction: "#1D4ED8",
+  onPrimary: "#FFFFFF",
   transparent: "rgba(0, 0, 0, 0)",
   /**
    * The default text color in many components.

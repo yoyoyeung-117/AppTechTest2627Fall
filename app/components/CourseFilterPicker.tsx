@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { FlatList, Keyboard, Modal, View, type ViewStyle } from "react-native"
+import { FlatList, Keyboard, Modal, useWindowDimensions, View, type ViewStyle } from "react-native"
 
 import type { FilterOption } from "@/data/courseSearch"
 import { useAppTheme } from "@/theme/context"
@@ -20,15 +20,17 @@ interface CourseFilterPickerProps {
 export function CourseFilterPicker({ label, options, value, onChange }: CourseFilterPickerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const { themed } = useAppTheme()
+  const { width, fontScale } = useWindowDimensions()
   const selectedLabel = options.find((option) => option.value === value)?.label
 
   return (
     <>
       <Button
         text={selectedLabel}
+        preset={value === null ? "default" : "filled"}
         accessibilityLabel={`${label}: ${selectedLabel}`}
         accessibilityState={{ expanded: isOpen }}
-        style={$trigger}
+        style={[$trigger, (width < 360 || fontScale >= 1.3) && $fullWidthTrigger]}
         onPress={() => {
           Keyboard.dismiss()
           setIsOpen(true)
@@ -36,15 +38,17 @@ export function CourseFilterPicker({ label, options, value, onChange }: CourseFi
       />
       <Modal visible={isOpen} animationType="slide" onRequestClose={() => setIsOpen(false)}>
         <Screen preset="fixed" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$screen}>
-          <View style={themed($header)}>
-            <Text
-              text={`Choose ${label.toLowerCase()}`}
-              preset="heading"
-              accessibilityRole="header"
-            />
-            <Button text="Cancel" onPress={() => setIsOpen(false)} />
-          </View>
           <FlatList
+            ListHeaderComponent={
+              <View style={themed($header)}>
+                <Text
+                  text={`Choose ${label.toLowerCase()}`}
+                  preset="heading"
+                  accessibilityRole="header"
+                />
+                <Button text="Cancel" onPress={() => setIsOpen(false)} />
+              </View>
+            }
             style={$list}
             data={options}
             extraData={value}
@@ -73,12 +77,16 @@ export function CourseFilterPicker({ label, options, value, onChange }: CourseFi
 const $screen: ViewStyle = { flex: 1 }
 const $list: ViewStyle = { flex: 1 }
 const $trigger: ViewStyle = { flexGrow: 1, flexBasis: 140 }
+const $fullWidthTrigger: ViewStyle = { flexBasis: "100%" }
 const $header: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  padding: spacing.lg,
+  paddingVertical: spacing.lg,
   gap: spacing.sm,
 })
 const $options: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.lg,
+  width: "100%",
+  maxWidth: 760,
+  alignSelf: "center",
+  paddingHorizontal: spacing.md,
   paddingBottom: spacing.lg,
 })
 const $option: ThemedStyle<ViewStyle> = ({ spacing }) => ({ marginBottom: spacing.xs })

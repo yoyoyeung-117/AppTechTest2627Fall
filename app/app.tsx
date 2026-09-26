@@ -42,6 +42,7 @@ const config = {
     CourseList: {
       path: "",
     },
+    CourseDetails: "courses/:courseKey",
   },
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { FlatList, View, type ViewStyle } from "react-native"
+import { FlatList, Keyboard, Pressable, View, type ViewStyle } from "react-native"
 
 import { Button } from "@/components/Button"
 import { CourseFilterPicker } from "@/components/CourseFilterPicker"
@@ -9,10 +9,11 @@ import { TextField } from "@/components/TextField"
 import { courses, courseSearchIndex, departmentOptions, semesterOptions } from "@/data/courses"
 import { filterCourses } from "@/data/courseSearch"
 import type { CourseSummary } from "@/data/courseTypes"
+import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
-export function CourseListScreen() {
+export function CourseListScreen({ navigation }: AppStackScreenProps<"CourseList">) {
   const { themed } = useAppTheme()
   const [query, setQuery] = useState("")
   const [termCode, setTermCode] = useState<string | null>(null)
@@ -79,7 +80,16 @@ export function CourseListScreen() {
         keyExtractor={(course) => course.key}
         contentContainerStyle={themed($listContent)}
         renderItem={({ item }) => (
-          <View style={themed($courseCard)}>
+          <Pressable
+            style={({ pressed }) => [themed($courseCard), pressed && $pressedCard]}
+            accessibilityRole="button"
+            accessibilityLabel={`${item.code}, ${item.title}, ${item.termName}`}
+            accessibilityHint="Opens course details"
+            onPress={() => {
+              Keyboard.dismiss()
+              navigation.navigate("CourseDetails", { courseKey: item.key })
+            }}
+          >
             <Text text={item.code} preset="subheading" />
             <Text text={item.title} />
             <Text
@@ -90,7 +100,7 @@ export function CourseListScreen() {
               }
             />
             <Text text={`${item.department} · ${item.termName}`} size="sm" />
-          </View>
+          </Pressable>
         )}
         ListEmptyComponent={
           <Text text="No courses match. Try another search or reset your filters." />
@@ -102,6 +112,7 @@ export function CourseListScreen() {
 
 const $screen: ViewStyle = { flex: 1 }
 const $list: ViewStyle = { flex: 1 }
+const $pressedCard: ViewStyle = { opacity: 0.7 }
 
 const $filters: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",

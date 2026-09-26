@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 
 import Config from "@/config"
+import { CourseDetailsScreen } from "@/screens/CourseDetailsScreen"
 import { CourseListScreen } from "@/screens/CourseListScreen"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { useAppTheme } from "@/theme/context"
@@ -36,6 +37,7 @@ const AppStack = () => {
       initialRouteName="CourseList"
     >
       <Stack.Screen name="CourseList" component={CourseListScreen} />
+      <Stack.Screen name="CourseDetails" component={CourseDetailsScreen} />
     </Stack.Navigator>
   )
 }

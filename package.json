@@ -7,6 +7,7 @@
     "data:prepare": "node --import tsx scripts/prepare-courses.ts",
     "test:data": "node --import tsx --test scripts/course-data.checks.ts",
     "test:search": "node --import tsx --test scripts/course-search.checks.ts",
+    "test:details": "node --import tsx --test scripts/course-details.checks.ts",
     "start": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",

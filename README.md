@@ -2,8 +2,8 @@
 
 An Expo and React Native course explorer built incrementally from the Ignite starter.
 The current app displays local course records with code/title search and combined
-semester/department filters. Detail navigation and prerequisite traversal are not
-implemented yet.
+semester/department filters and semester-specific course details. Prerequisite
+traversal is not implemented yet; details currently display the source text.
 
 ## Run the current app
 
@@ -19,13 +19,13 @@ The first Android build requires a configured JDK, Android SDK, and an emulator 
 connected device. For subsequent JavaScript-only changes, run
 `npx expo start --dev-client`. The starter's native dependencies require a development
 build. The original starter was launched successfully on an Android emulator; the
-new search and filter interactions still need manual device review. iOS has not been tested.
+new course-detail interactions still need manual device review. iOS has not been tested.
 
 ## Local course data
 
 Keep the supplied `courses.json` in the repository root. Run `npm run data:prepare`
-after replacing it. The generated `app/data/generated/course-summaries.json` should
-be committed alongside source changes; do not edit it manually.
+after replacing it. Commit the generated files in `app/data/generated/` alongside
+source changes; do not edit them manually.
 
 The supplied file contains 15,178 semester-specific records across four terms.
 The preparation script validates required fields and credit ranges, rejects duplicate
@@ -33,10 +33,10 @@ semester/course keys, and produces a compact list model. All records are retaine
 The original file is 28,878,583 bytes; the generated list file is 2,752,545 bytes.
 These are file sizes, not measurements of application memory or launch performance.
 
-Only the generated summaries are imported into the app. They include course code,
-title, department, semester, and minimum/maximum credits. Descriptions and raw
-prerequisite text remain in the original dataset for future detail/explorer work.
-Data preparation runs in Node.js on the development machine, not on the phone.
+The list imports generated summaries containing course code, title, department,
+semester, and minimum/maximum credits. Detailed text is generated separately by term
+and accessed only when a detail page for that term is visited. Data preparation runs
+in Node.js on the development machine, not on the phone.
 
 `CourseListScreen` uses a `FlatList` inside a non-scrolling `Screen`. The list
 virtualizes its rows; the summary array itself is still loaded in full. A row's
@@ -77,6 +77,28 @@ runs synchronously on the JavaScript thread; `useMemo` is not a worker or deboun
 A local 50-query Node.js check measured approximately 0.55 ms median and 0.66 ms p95
 on 15,178 records. This does not measure mobile rendering or typing responsiveness.
 
+## Course details and navigation
+
+Tapping a card navigates with `{ courseKey: "2610:007920" }`, rather than passing an
+entire course object. `CourseDetailsScreen` looks up that exact semester/course key
+using `getCourseDetails`. It displays the description, credits/range, semester,
+department, campus, and raw prerequisite text. Corequisites, exclusions, and
+recommended background are shown when present. Empty prerequisites are described as
+"No prerequisites listed", not treated as a verified eligibility decision.
+
+Back returns to the existing list screen, preserving its in-memory query, filters,
+and scroll position during normal stack navigation. A direct detail link without
+history can return to the catalogue via the on-screen button. Unknown/stale keys
+show a recoverable "Course not found" state. Links use `courses/:courseKey`.
+
+The generated detail loader uses literal `require` paths so Metro can include the
+files without requesting a server. Each term's JSON module is evaluated when first
+accessed and cached by the runtime. All term modules remain included in the app
+bundle: this is deferred evaluation, not a reduction in download size. Loading is
+synchronous and first-visit latency still needs device measurement. The four detail
+files contain 2,139,393; 2,271,026; 2,290,874; and 2,381,181 bytes respectively for
+terms 2520, 2530, 2540, and 2610.
+
 ## Checks
 
 ```bash
@@ -84,6 +106,7 @@ npm run compile
 npm run lint:check
 npm run test:data
 npm run test:search
+npm run test:details
 ```
 
 The data checks use Node's test runner separately from the starter's Jest tests.
@@ -92,6 +115,11 @@ malformed records, and an empty dataset.
 Search checks cover code/title normalization, combined filters, reset/empty results,
 stable source order, and distinct department options. Full-dataset checks confirmed
 15,178 unfiltered records and 3,928 records for term 2610.
+Detail checks cover semester isolation, raw prerequisite wording, empty text,
+malformed data, invalid course keys, and equality of all generated detail records
+with their original source fields.
+An offline Expo Android bundle export passed after adding detail navigation and
+the generated loaders. Device navigation and visual checks remain pending.
 
 ## Original Ignite starter documentation
 

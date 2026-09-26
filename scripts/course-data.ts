@@ -1,4 +1,4 @@
-import type { CourseSummary } from "../app/data/courseTypes"
+import type { CourseDetailContent, CourseSummary } from "../app/data/courseTypes"
 
 /** Validate external JSON before converting it to the app's smaller data model. */
 export function buildCourseSummaries(input: unknown): CourseSummary[] {
@@ -55,4 +55,36 @@ export function buildCourseSummaries(input: unknown): CourseSummary[] {
       a.code.localeCompare(b.code, "en") ||
       a.key.localeCompare(b.key, "en"),
   )
+}
+
+/** Keep detailed text separate from the small list summaries, grouped by term. */
+export function buildCourseDetails(
+  input: unknown,
+): Record<string, Record<string, CourseDetailContent>> {
+  // Validate identities using the same rules as the summary generator.
+  buildCourseSummaries(input)
+  const terms: Record<string, Record<string, CourseDetailContent>> = {}
+  for (const value of input as Record<string, unknown>[]) {
+    const termCode = (value.term_code as string).trim()
+    const id = (value.id as string).trim()
+    // Term codes become filenames; reject unexpected path characters.
+    if (!/^\d{4}$/.test(termCode)) throw new Error(`Invalid term code: ${termCode}`)
+
+    function text(field: string): string {
+      const content = value[field]
+      if (typeof content !== "string") throw new Error(`${termCode}:${id}: invalid ${field}`)
+      return content.trim()
+    }
+
+    terms[termCode] ??= {}
+    terms[termCode][`${termCode}:${id}`] = {
+      description: text("description"),
+      prerequisite: text("prerequisite"),
+      corequisite: text("corequisite"),
+      exclusion: text("exclusion"),
+      background: text("background"),
+      campus: text("campus_name"),
+    }
+  }
+  return terms
 }

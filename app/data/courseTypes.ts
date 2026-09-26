@@ -9,3 +9,14 @@ export interface CourseSummary {
   minCredits: number
   maxCredits: number
 }
+
+export interface CourseDetailContent {
+  description: string
+  prerequisite: string
+  corequisite: string
+  exclusion: string
+  background: string
+  campus: string
+}
+
+export interface CourseDetails extends CourseSummary, CourseDetailContent {}

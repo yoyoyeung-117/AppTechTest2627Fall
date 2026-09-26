@@ -1,8 +1,9 @@
 # HKUST Course Explorer
 
 An Expo and React Native course explorer built incrementally from the Ignite starter.
-The current app displays local course records across all supplied semesters. Search,
-filters, detail navigation, and prerequisite traversal are not implemented yet.
+The current app displays local course records with code/title search and combined
+semester/department filters. Detail navigation and prerequisite traversal are not
+implemented yet.
 
 ## Run the current app
 
@@ -18,7 +19,7 @@ The first Android build requires a configured JDK, Android SDK, and an emulator 
 connected device. For subsequent JavaScript-only changes, run
 `npx expo start --dev-client`. The starter's native dependencies require a development
 build. The original starter was launched successfully on an Android emulator; the
-new dataset-backed list still needs manual device review. iOS has not been tested.
+new search and filter interactions still need manual device review. iOS has not been tested.
 
 ## Local course data
 
@@ -44,10 +45,37 @@ Sorting uses descending term codes, then course codes, then keys. This chronolog
 term ordering is based on the supplied dataset's term-code format. A semester record
 is not proof that a class section is scheduled or has seats available.
 
-No mutable list state is needed yet. Navigation uses React Navigation; appearance
-uses the starter's theme context. Dataset summary types are in
+Navigation uses React Navigation; appearance uses the starter's theme context.
+Dataset summary types are in
 `app/data/courseTypes.ts`, transformation logic is in `scripts/course-data.ts`, and
 the app-facing data export is in `app/data/courses.ts`.
+
+## Search and filters
+
+The screen stores the search query, selected term code, and selected department in
+React state. `null` means all semesters/departments. Results are derived with
+`useMemo`, not maintained as a second independent state value. Changing criteria
+returns the list to the top; Reset clears all three criteria.
+
+`app/data/courseSearch.ts` builds lowercase search strings once at module load.
+They contain the spaced code, compact code, and title. The query is case-insensitive,
+trimmed, and split on whitespace; every query token must occur somewhere in that
+combined text. Thus `COMP2011` and `comp 2011` both match the expected code, and title
+words may appear in any order. This is substring matching, not fuzzy or exact-code
+matching. Search does not include descriptions or prerequisite text yet.
+
+The search query, semester, and department use AND semantics. Options are derived
+from the full dataset (four semesters and 72 departments), so selections remain
+stable even when a combination has no results. Department uses `department_code`,
+not the course prefix: for example, COMP 2011 belongs to CSE. Semester options are
+newest-first and departments alphabetical. Scrollable selection modals support
+Cancel and Android Back without changing the selection, plus an explicit All option.
+State is local to the screen and is not persisted across a fresh app launch.
+
+Filtering scans the prepared index in O(n) record visits for a fixed query. It still
+runs synchronously on the JavaScript thread; `useMemo` is not a worker or debounce.
+A local 50-query Node.js check measured approximately 0.55 ms median and 0.66 ms p95
+on 15,178 records. This does not measure mobile rendering or typing responsiveness.
 
 ## Checks
 
@@ -55,11 +83,15 @@ the app-facing data export is in `app/data/courses.ts`.
 npm run compile
 npm run lint:check
 npm run test:data
+npm run test:search
 ```
 
 The data checks use Node's test runner separately from the starter's Jest tests.
 They cover repeated courses across semesters, credit ranges, duplicate identities,
 malformed records, and an empty dataset.
+Search checks cover code/title normalization, combined filters, reset/empty results,
+stable source order, and distinct department options. Full-dataset checks confirmed
+15,178 unfiltered records and 3,928 records for term 2610.
 
 ## Original Ignite starter documentation
 

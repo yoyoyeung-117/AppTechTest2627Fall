@@ -17,6 +17,7 @@ export type DemoTabParamList = {
 
 // App Stack Navigator types
 export type AppStackParamList = {
+  CourseList: undefined
   Welcome: undefined
   Login: undefined
   Demo: NavigatorScreenParams<DemoTabParamList>

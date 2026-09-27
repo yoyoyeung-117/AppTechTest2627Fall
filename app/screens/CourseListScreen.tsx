@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { FlatList, Keyboard, Pressable, View, type TextStyle, type ViewStyle } from "react-native"
+import { FlatList, Keyboard, View, type TextStyle, type ViewStyle } from "react-native"
 
 import { Button } from "@/components/Button"
+import { CourseCard } from "@/components/CourseCard"
 import { CourseFilterPicker } from "@/components/CourseFilterPicker"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
@@ -101,34 +102,13 @@ export function CourseListScreen({ navigation }: AppStackScreenProps<"CourseList
         keyExtractor={(course) => course.key}
         contentContainerStyle={themed($listContent)}
         renderItem={({ item }) => (
-          <Pressable
-            style={({ pressed }) => [themed($courseCard), pressed && $pressedCard]}
-            accessibilityRole="button"
-            accessibilityLabel={`${item.code}, ${item.title}, ${item.termName}`}
-            accessibilityHint="Opens course details"
-            onPress={() => {
+          <CourseCard
+            course={item}
+            onOpen={() => {
               Keyboard.dismiss()
               navigation.navigate("CourseDetails", { courseKey: item.key })
             }}
-          >
-            <View style={$cardTop}>
-              <Text text={item.code} preset="subheading" style={themed($code)} />
-              <View style={themed($badge)}>
-                <Text
-                  text={
-                    item.minCredits === item.maxCredits
-                      ? `${item.minCredits} credits`
-                      : `${item.minCredits}–${item.maxCredits} credits`
-                  }
-                  size="xxs"
-                  weight="medium"
-                  style={themed($accent)}
-                />
-              </View>
-            </View>
-            <Text text={item.title} weight="medium" />
-            <Text text={`${item.department} · ${item.termName}`} size="xs" style={themed($muted)} />
-          </Pressable>
+          />
         )}
         ListEmptyComponent={
           <View style={themed($courseCard)}>
@@ -146,7 +126,6 @@ export function CourseListScreen({ navigation }: AppStackScreenProps<"CourseList
 
 const $screen: ViewStyle = { flex: 1 }
 const $list: ViewStyle = { flex: 1 }
-const $pressedCard: ViewStyle = { opacity: 0.7 }
 
 const $filters: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
@@ -179,23 +158,5 @@ const $courseCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
 })
 
 const $heading: TextStyle = { fontSize: 32, lineHeight: 40 }
-const $cardTop: ViewStyle = {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 8,
-}
-const $code: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.tint,
-  fontSize: 20,
-  lineHeight: 28,
-})
 const $accent: ThemedStyle<TextStyle> = ({ colors }) => ({ color: colors.tint })
 const $muted: ThemedStyle<TextStyle> = ({ colors }) => ({ color: colors.textDim })
-const $badge: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  backgroundColor: colors.accentSurface,
-  paddingHorizontal: 10,
-  paddingVertical: 4,
-  borderRadius: 8,
-})

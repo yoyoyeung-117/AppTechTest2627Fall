@@ -25,6 +25,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller"
 import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
 
 import { AuthProvider } from "./context/AuthContext"
+import { FavoritesProvider } from "./context/FavoritesContext"
 import { initI18n } from "./i18n"
 import { AppNavigator } from "./navigators/AppNavigator"
 import { useNavigationPersistence } from "./navigators/navigationUtilities"
@@ -43,6 +44,7 @@ const config = {
       path: "",
     },
     CourseDetails: "courses/:courseKey",
+    Favorites: "favorites",
   },
 }
 
@@ -88,11 +90,13 @@ export function App() {
       <KeyboardProvider>
         <AuthProvider>
           <ThemeProvider>
-            <AppNavigator
-              linking={linking}
-              initialState={initialNavigationState}
-              onStateChange={onNavigationStateChange}
-            />
+            <FavoritesProvider>
+              <AppNavigator
+                linking={linking}
+                initialState={initialNavigationState}
+                onStateChange={onNavigationStateChange}
+              />
+            </FavoritesProvider>
           </ThemeProvider>
         </AuthProvider>
       </KeyboardProvider>

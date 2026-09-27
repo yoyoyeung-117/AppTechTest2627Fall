@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { FlatList, Keyboard, Modal, useWindowDimensions, View, type ViewStyle } from "react-native"
 
 import type { FilterOption } from "@/data/courseSearch"
@@ -8,6 +8,7 @@ import type { ThemedStyle } from "@/theme/types"
 import { Button } from "./Button"
 import { Screen } from "./Screen"
 import { Text } from "./Text"
+import { TextField } from "./TextField"
 
 interface CourseFilterPickerProps {
   label: string
@@ -19,9 +20,29 @@ interface CourseFilterPickerProps {
 /** One reusable selector for semesters and departments; no native dependency needed. */
 export function CourseFilterPicker({ label, options, value, onChange }: CourseFilterPickerProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [query, setQuery] = useState("")
+  const listRef = useRef<FlatList<FilterOption>>(null)
   const { themed } = useAppTheme()
   const { width, fontScale } = useWindowDimensions()
   const selectedLabel = options.find((option) => option.value === value)?.label
+  const searchLabel = `Search ${label.toLowerCase()}`
+  const filteredOptions = useMemo(() => {
+    const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean)
+    return options.filter((option) => {
+      const searchText = `${option.label} ${option.value ?? ""}`.toLowerCase()
+      return words.every((word) => searchText.includes(word))
+    })
+  }, [options, query])
+
+  function updateQuery(nextQuery: string) {
+    setQuery(nextQuery)
+    listRef.current?.scrollToOffset({ offset: 0, animated: false })
+  }
+
+  function closePicker() {
+    Keyboard.dismiss()
+    setIsOpen(false)
+  }
 
   return (
     <>
@@ -33,12 +54,14 @@ export function CourseFilterPicker({ label, options, value, onChange }: CourseFi
         style={[$trigger, (width < 360 || fontScale >= 1.3) && $fullWidthTrigger]}
         onPress={() => {
           Keyboard.dismiss()
+          setQuery("")
           setIsOpen(true)
         }}
       />
-      <Modal visible={isOpen} animationType="slide" onRequestClose={() => setIsOpen(false)}>
+      <Modal visible={isOpen} animationType="slide" onRequestClose={closePicker}>
         <Screen preset="fixed" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$screen}>
           <FlatList
+            ref={listRef}
             ListHeaderComponent={
               <View style={themed($header)}>
                 <Text
@@ -46,14 +69,39 @@ export function CourseFilterPicker({ label, options, value, onChange }: CourseFi
                   preset="heading"
                   accessibilityRole="header"
                 />
-                <Button text="Cancel" onPress={() => setIsOpen(false)} />
+                <Button text="Cancel" onPress={closePicker} />
+                <TextField
+                  label={searchLabel}
+                  accessibilityLabel={searchLabel}
+                  placeholder={`Type to search ${label.toLowerCase()}`}
+                  value={query}
+                  onChangeText={updateQuery}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="search"
+                  onSubmitEditing={Keyboard.dismiss}
+                />
+                {!!query && (
+                  <Button text="Clear search" preset="filled" onPress={() => updateQuery("")} />
+                )}
+                <Text
+                  text={`${filteredOptions.length} of ${options.length} options`}
+                  size="sm"
+                  accessibilityLiveRegion="polite"
+                />
               </View>
             }
             style={$list}
-            data={options}
+            data={filteredOptions}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            onScrollBeginDrag={Keyboard.dismiss}
             extraData={value}
             keyExtractor={(option) => option.value ?? "all"}
             contentContainerStyle={themed($options)}
+            ListEmptyComponent={
+              <Text text="No matches. Try another search or clear your search." />
+            }
             renderItem={({ item }) => (
               <Button
                 text={`${item.value === value ? "✓ " : ""}${item.label}`}
@@ -63,7 +111,7 @@ export function CourseFilterPicker({ label, options, value, onChange }: CourseFi
                 style={themed($option)}
                 onPress={() => {
                   onChange(item.value)
-                  setIsOpen(false)
+                  closePicker()
                 }}
               />
             )}

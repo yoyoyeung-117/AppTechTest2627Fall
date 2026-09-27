@@ -20,10 +20,6 @@ export function PrerequisiteExplorer({ course, onOpen }: ExplorerProps) {
   return (
     <View style={themed($group)}>
       <Text text="Prerequisites" preset="subheading" accessibilityRole="header" />
-      <Text
-        text="Explore the courses below. The original wording defines AND/OR choices and other conditions; links do not confirm eligibility."
-        size="sm"
-      />
       <PrerequisiteLevel course={course} ancestors={[course.key]} onOpen={onOpen} />
     </View>
   )

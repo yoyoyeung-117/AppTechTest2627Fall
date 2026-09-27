@@ -48,7 +48,7 @@ export function CourseListScreen({ navigation }: AppStackScreenProps<"CourseList
               style={themed($accent)}
             />
             <Text
-              text="Find your next course."
+              text="Course explorer"
               preset="heading"
               style={$heading}
               accessibilityRole="header"

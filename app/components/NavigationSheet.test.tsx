@@ -12,11 +12,18 @@ jest.mock("react-native-safe-area-context", () => ({
 beforeEach(() => jest.useFakeTimers())
 afterEach(() => jest.useRealTimers())
 
-function setup() {
+function setup(currentRoute = "CourseList") {
   const onNavigate = jest.fn()
+  const onGoBack = jest.fn()
+  const onGoTop = jest.fn()
   const screen = render(
     <ThemeProvider>
-      <NavigationSheet currentRoute="CourseList" onNavigate={onNavigate} />
+      <NavigationSheet
+        currentRoute={currentRoute}
+        onNavigate={onNavigate}
+        onGoBack={onGoBack}
+        onGoTop={onGoTop}
+      />
     </ThemeProvider>,
   )
   function open() {
@@ -24,8 +31,30 @@ function setup() {
     fireEvent(screen.UNSAFE_getByType(Modal), "show")
     act(() => jest.runAllTimers())
   }
-  return { ...screen, onNavigate, open }
+  return { ...screen, onNavigate, onGoBack, onGoTop, open }
 }
+
+it.each(["CourseList", "Favorites"])("hides Back on %s", (route) => {
+  const screen = setup(route)
+  expect(screen.queryByLabelText("Back to previous page")).toBeNull()
+})
+
+it("returns directly from details without opening the page menu", () => {
+  const screen = setup("CourseDetails")
+  expect(screen.queryByLabelText("Scroll to top")).toBeNull()
+  fireEvent.press(screen.getByLabelText("Back to previous page"))
+  expect(screen.onGoBack).toHaveBeenCalledTimes(1)
+  expect(screen.onNavigate).not.toHaveBeenCalled()
+  expect(screen.queryByText("Go to page")).toBeNull()
+})
+
+it.each(["CourseList", "Favorites"])("scrolls %s to the top without navigating", (route) => {
+  const screen = setup(route)
+  fireEvent.press(screen.getByLabelText("Scroll to top"))
+  expect(screen.onGoTop).toHaveBeenCalledTimes(1)
+  expect(screen.onNavigate).not.toHaveBeenCalled()
+  expect(screen.queryByText("Go to page")).toBeNull()
+})
 
 it("starts collapsed and opens a selected-page-aware menu", () => {
   const screen = setup()

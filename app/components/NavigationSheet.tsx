@@ -23,9 +23,16 @@ import { Text } from "./Text"
 interface NavigationSheetProps {
   currentRoute?: string
   onNavigate: (page: NavigationPage) => void
+  onGoBack?: () => void
+  onGoTop?: () => void
 }
 
-export function NavigationSheet({ currentRoute, onNavigate }: NavigationSheetProps) {
+export function NavigationSheet({
+  currentRoute,
+  onNavigate,
+  onGoBack,
+  onGoTop,
+}: NavigationSheetProps) {
   const { themed } = useAppTheme()
   const insets = useSafeAreaInsets()
   const { height } = useWindowDimensions()
@@ -35,6 +42,7 @@ export function NavigationSheet({ currentRoute, onNavigate }: NavigationSheetPro
   const progress = useRef(new Animated.Value(0)).current
   const closing = useRef(false)
   const reduceMotion = useRef(false)
+  const showTop = (currentRoute === "CourseList" || currentRoute === "Favorites") && !!onGoTop
 
   useEffect(() => {
     let mounted = true
@@ -106,21 +114,42 @@ export function NavigationSheet({ currentRoute, onNavigate }: NavigationSheetPro
   return (
     <>
       {!keyboardVisible && (
-        <View
-          style={[themed($dock), { paddingBottom: insets.bottom }]}
-          {...revealGesture.panHandlers}
-        >
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Open page navigation"
-            accessibilityHint="Tap or swipe up to switch pages"
-            accessibilityState={{ expanded: visible }}
-            onPress={open}
-            style={$launcher}
-          >
-            <View style={themed($handle)} />
-            <Text text="Pages" size="xxs" weight="medium" style={themed($accent)} />
-          </Pressable>
+        <View style={[themed($dock), { paddingBottom: insets.bottom }]}>
+          {showTop && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Scroll to top"
+              onPress={onGoTop}
+              style={({ pressed }) => [$back, pressed && $pressed]}
+            >
+              <Text text="↑ Top" weight="medium" style={themed($accent)} />
+            </Pressable>
+          )}
+          {currentRoute === "CourseDetails" && onGoBack && <View style={$backSpacer} />}
+          <View style={$fill} {...revealGesture.panHandlers}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Open page navigation"
+              accessibilityHint="Tap or swipe up to switch pages"
+              accessibilityState={{ expanded: visible }}
+              onPress={open}
+              style={$launcher}
+            >
+              <View style={themed($handle)} />
+              <Text text="Pages" size="xxs" weight="medium" style={themed($accent)} />
+            </Pressable>
+          </View>
+          {showTop && <View style={$backSpacer} />}
+          {currentRoute === "CourseDetails" && onGoBack && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Back to previous page"
+              onPress={onGoBack}
+              style={({ pressed }) => [$back, pressed && $pressed]}
+            >
+              <Text text="‹ Back" weight="medium" style={themed($accent)} />
+            </Pressable>
+          )}
         </View>
       )}
       <Modal
@@ -206,10 +235,20 @@ export function NavigationSheet({ currentRoute, onNavigate }: NavigationSheetPro
 
 const $fill: ViewStyle = { flex: 1 }
 const $dock: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  flexDirection: "row",
+  alignItems: "center",
   backgroundColor: colors.surface,
   borderTopColor: colors.separator,
   borderTopWidth: 1,
 })
+const $back: ViewStyle = {
+  width: 96,
+  minHeight: 48,
+  paddingHorizontal: 12,
+  justifyContent: "center",
+  alignItems: "center",
+}
+const $backSpacer: ViewStyle = { width: 96 }
 const $launcher: ViewStyle = {
   minHeight: 48,
   alignItems: "center",

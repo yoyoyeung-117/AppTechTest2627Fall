@@ -1,7 +1,6 @@
 import { useMemo } from "react"
 import { View, type TextStyle, type ViewStyle } from "react-native"
 
-import { Button } from "@/components/Button"
 import { FavoriteButton } from "@/components/FavoriteButton"
 import { PrerequisiteExplorer } from "@/components/PrerequisiteExplorer"
 import { Screen } from "@/components/Screen"
@@ -16,23 +15,12 @@ export function CourseDetailsScreen({ navigation, route }: AppStackScreenProps<"
   const courseKey = route.params?.courseKey
   const course = useMemo(() => getCourseDetails(courseKey), [courseKey])
 
-  function goBack() {
-    if (navigation.canGoBack()) navigation.goBack()
-    else navigation.replace("CourseList")
-  }
-
   return (
     <Screen
       preset="scroll"
       safeAreaEdges={["top", "bottom"]}
       contentContainerStyle={themed($container)}
     >
-      <Button
-        text={navigation.canGoBack() ? "‹ Back" : "Back to courses"}
-        style={$back}
-        preset="filled"
-        onPress={goBack}
-      />
       {!course ? (
         <>
           <Text text="Course not found" preset="heading" accessibilityRole="header" />
@@ -121,6 +109,5 @@ const $hero: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   gap: spacing.sm,
 })
 const $accent: ThemedStyle<TextStyle> = ({ colors }) => ({ color: colors.tint })
-const $back: ViewStyle = { alignSelf: "flex-start", minWidth: 88 }
 const $heroTop: ViewStyle = { flexDirection: "row", alignItems: "center", gap: 12 }
 const $heroLabel: TextStyle = { flex: 1 }

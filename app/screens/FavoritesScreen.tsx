@@ -7,6 +7,7 @@ import { CourseFilterPicker } from "@/components/CourseFilterPicker"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useFavorites } from "@/context/FavoritesContext"
+import { useListScrollToTop } from "@/context/ListScrollContext"
 import { courses, semesterOptions } from "@/data/courses"
 import type { CourseSummary } from "@/data/courseTypes"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
@@ -18,6 +19,7 @@ export function FavoritesScreen({ navigation }: AppStackScreenProps<"Favorites">
   const { favoriteKeys } = useFavorites()
   const [termCode, setTermCode] = useState<string | null>(null)
   const listRef = useRef<FlatList<CourseSummary>>(null)
+  useListScrollToTop(listRef)
   const favorites = useMemo(
     () => courses.filter((course) => favoriteKeys.has(course.key)),
     [favoriteKeys],

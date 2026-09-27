@@ -7,6 +7,7 @@ import { CourseFilterPicker } from "@/components/CourseFilterPicker"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
+import { useListScrollToTop } from "@/context/ListScrollContext"
 import { courses, courseSearchIndex, departmentOptions, semesterOptions } from "@/data/courses"
 import { filterCourses } from "@/data/courseSearch"
 import type { CourseSummary } from "@/data/courseTypes"
@@ -20,6 +21,7 @@ export function CourseListScreen({ navigation }: AppStackScreenProps<"CourseList
   const [termCode, setTermCode] = useState<string | null>(null)
   const [department, setDepartment] = useState<string | null>(null)
   const listRef = useRef<FlatList<CourseSummary>>(null)
+  useListScrollToTop(listRef)
 
   const filteredCourses = useMemo(
     () => filterCourses(courseSearchIndex, { query, termCode, department }),

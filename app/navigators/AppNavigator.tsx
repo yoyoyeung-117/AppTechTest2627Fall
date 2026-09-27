@@ -1,11 +1,12 @@
 /** The course explorer is available without authentication. */
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { View, type ViewStyle } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 
 import { NavigationSheet } from "@/components/NavigationSheet"
 import Config from "@/config"
+import { ListScrollContext } from "@/context/ListScrollContext"
 import { CourseDetailsScreen } from "@/screens/CourseDetailsScreen"
 import { CourseListScreen } from "@/screens/CourseListScreen"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
@@ -51,9 +52,16 @@ const AppStack = () => {
 export const AppNavigator = (props: NavigationProps) => {
   const { navigationTheme } = useAppTheme()
   const [currentRoute, setCurrentRoute] = useState<string>()
+  const scrollToTopRef = useRef<(() => void) | null>(null)
   const navigateToPage = useCallback((name: NavigationPage) => {
     if (!navigationRef.isReady() || navigationRef.getCurrentRoute()?.name === name) return
     navigationRef.navigate({ name, params: undefined, pop: true })
+  }, [])
+  const goBackFromDetails = useCallback(() => {
+    if (!navigationRef.isReady() || navigationRef.getCurrentRoute()?.name !== "CourseDetails")
+      return
+    if (navigationRef.canGoBack()) navigationRef.goBack()
+    else navigationRef.resetRoot({ index: 0, routes: [{ name: "CourseList" }] })
   }, [])
 
   useBackButtonHandler((routeName) => exitRoutes.includes(routeName))
@@ -73,12 +81,19 @@ export const AppNavigator = (props: NavigationProps) => {
       }}
     >
       <ErrorBoundary catchErrors={Config.catchErrors}>
-        <View style={$root}>
+        <ListScrollContext.Provider value={scrollToTopRef}>
           <View style={$root}>
-            <AppStack />
+            <View style={$root}>
+              <AppStack />
+            </View>
+            <NavigationSheet
+              currentRoute={currentRoute}
+              onNavigate={navigateToPage}
+              onGoBack={goBackFromDetails}
+              onGoTop={() => scrollToTopRef.current?.()}
+            />
           </View>
-          <NavigationSheet currentRoute={currentRoute} onNavigate={navigateToPage} />
-        </View>
+        </ListScrollContext.Provider>
       </ErrorBoundary>
     </NavigationContainer>
   )
